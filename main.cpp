@@ -3,6 +3,7 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include <cmath>
 
 #define MINE 'P'
 #define EMPTY 'o'
@@ -91,28 +92,83 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 
 				mines--;
 				//posible bomb check
-				if (board[r][c] - '0' >= emptyN && emptyN > 0) {
-					if (mines < board[r][c] - '0') {
+				if ((emptyN == board[r][c] - '0' - mines) && emptyN > 0) {
+					//if (emptyN == board[r][c] - '0' - mines) {
 						(*globalMines)--;
 						std::cout << "mark " << emptyPos[0] << " " << emptyPos[1] <<   "\n";
 						return emptyPos;
-					}
-					std::cout << "step " << emptyPos[0] << " " << emptyPos[1] <<  "\n";
-					return emptyPos;
+					//}
+					
 
+				}else if(emptyN > 0 && (board[r][c] - '0') - mines == 0) {
+					std::cout << "step " << emptyPos[0] << " " << emptyPos[1] << "\n";
+					return emptyPos;
 				}
 			}
 		}
 	}
-	std::cout << "random\n"; //TODO del
+
+
+	for (uint16_t c = 0, r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			if (board[r][c] == EMPTY) {
+				std::cout << "random step" << r << c << "\n"; //TODO del
+				return std::vector<int> {r, c};
+
+			}
+		}
+	}
 	return emptyPos;
 }
+
+
+
+//TODO del
+//void gaussElimination(std::vector<std::vector<int>> a) {
+//
+//	for (int i = 0; i < a.size()-1; i++) {
+//		// Find the pivot row
+//		int pivot = i;
+//		for (int j = i + 1; j < a.size(); j++) {
+//			if (std::abs(a[j][i]) > std::abs(a[pivot][i])) {
+//				pivot = j;
+//			}
+//		}
+//
+//		// Swap the current row with the pivot row
+//		for (int j = 0; j < a[0].size(); j++) {
+//			std::swap(a[i][j], a[pivot][j]);
+//		}
+//
+//		// Perform elimination for each row
+//		for (int j = i + 1; j < a.size(); j++) {
+//			double factor = a[j][i] / a[i][i];
+//			for (int k = i; k < a[0].size(); k++) {
+//				a[j][k] -= factor * a[i][k];
+//			}
+//		}
+//	}
+//
+//	return;
+//}
+
 
 
 //int main(int argc, char* argv[])
 int main()
 {
-	uint16_t rows = 4, columns = 10, minesleft = 4 ;
+
+	//std::vector<std::vector<int>> a = { {2, -1, 1, 5},
+	//				  {1, -2, 2, 3},
+	//				  {1, 1, 1, 6} };
+
+	//gaussElimination(a);
+
+
+
+
+	//.............
+	uint16_t rows = 9, columns = 9, minesleft = 10 ;
 	std::vector<std::vector<char>> board(rows, std::vector<char>(columns));
 	std::vector<int> lastPos(2);
 
@@ -121,7 +177,7 @@ int main()
 	while (true)
 	{
 
-		ret = readBoard(&board, 4, 10);
+		ret = readBoard(&board, rows, columns);
 		if (ret == 3)
 			return EXIT_FAILURE;
 		if (ret == 1)
@@ -132,10 +188,10 @@ int main()
 		//}
 		lastPos = printAction(board, &minesleft);
 
-		if (minesleft == 0) {
-			std::cout << "all mines marked\n"; //TODO del
-			return EXIT_SUCCESS;
-		}
+		//if (minesleft == 0) {
+		//	std::cout << "all mines marked\n"; //TODO del
+		//	return EXIT_SUCCESS;
+		//}
 	}
 
 	return 0;
