@@ -10,6 +10,7 @@
 #define EMPTY 'o'
 #define ZERO '.'
 
+
 uint8_t readBoard(std::vector<std::vector<char>>* board, uint16_t rows, uint16_t columns) {
 
 	
@@ -124,106 +125,183 @@ return emptyPos;
 }
 
 
-bool wasVisited(std::vector<std::pair<int, int>>& visitedCells, std::pair<int, int> x) {
-	if (std::find(visitedCells.begin(), visitedCells.end(), x) != visitedCells.end()) {
-		return true;
-	}
-	return false;
-}
 
-void getBorder(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>* visitedCells, uint16_t r, uint16_t c);
+// referencing function used in function bellow, but declared later
+void getBorderEmpty(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>* visitedCells, uint16_t r, uint16_t c);
 
-void getBorderEmpty(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>* visitedCells, uint16_t r, uint16_t c) {
-
-	size_t rows = board.size(), cols = board[0].size();
-
-
-
-	// finding empty spaces around the cell
-	if (r > 0 && isdigit(board[r - 1][c]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r - 1, c}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r - 1,c });
-		getBorder(board, visitedCells, r - 1, c);
-	}
-	if (r > 0 && c > 0 && isdigit(board[r - 1][c - 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r - 1, c - 1}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r - 1,c - 1 });
-		getBorder(board, visitedCells, r - 1, c - 1);
-	}
-	if (r > 0 && c < cols - 1 && isdigit(board[r - 1][c + 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r - 1, c + 1}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r - 1, c + 1 });
-		getBorder(board, visitedCells, r - 1, c + 1);
-	}
-	if (r < rows - 1 && isdigit(board[r + 1][c]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r + 1, c}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r + 1, c });
-		getBorder(board, visitedCells, r + 1, c);
-	}
-	if (r < rows - 1 && c > 0 && isdigit(board[r + 1][c - 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r + 1, c - 1}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r + 1, c - 1 });
-		getBorder(board, visitedCells, r + 1, c - 1);
-	}
-	if (r < rows - 1 && c < cols - 1 && isdigit(board[r + 1][c + 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r + 1, c + 1}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r + 1, c + 1 });
-		getBorder(board, visitedCells, r + 1, c + 1);
-	}
-	if (c < cols - 1 && isdigit(board[r][c + 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r, c + 1}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r , c + 1 });
-		getBorder(board, visitedCells, r, c + 1);
-	}
-	if (c > 0 && isdigit(board[r][c - 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r, c - 1}) == (*visitedCells)[1].end()) {
-		(*visitedCells)[1].push_back({ r , c - 1 });
-		getBorder(board, visitedCells, r, c - 1);
-	}
-
-
-}
-
+// Recursive function to find border. Adds number cells
+// visitedCells[0] are empty cells
+// visitedCells[1] are number cells
 void getBorder(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>* visitedCells, uint16_t r, uint16_t c) {
 
 	size_t rows = board.size(), cols = board[0].size();
 
 
+	if (r > 0 && isdigit(board[r - 1][c]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r - 1, c}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r - 1,c });
+		getBorderEmpty(board, visitedCells, r - 1, c);
+	}
+	if (r > 0 && c > 0 && isdigit(board[r - 1][c - 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r - 1, c - 1}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r - 1,c - 1 });
+		getBorderEmpty(board, visitedCells, r - 1, c - 1);
+	}
+	if (r > 0 && c < cols - 1 && isdigit(board[r - 1][c + 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r - 1, c + 1}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r - 1, c + 1 });
+		getBorderEmpty(board, visitedCells, r - 1, c + 1);
+	}
+	if (r < rows - 1 && isdigit(board[r + 1][c]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r + 1, c}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r + 1, c });
+		getBorderEmpty(board, visitedCells, r + 1, c);
+	}
+	if (r < rows - 1 && c > 0 && isdigit(board[r + 1][c - 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r + 1, c - 1}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r + 1, c - 1 });
+		getBorderEmpty(board, visitedCells, r + 1, c - 1);
+	}
+	if (r < rows - 1 && c < cols - 1 && isdigit(board[r + 1][c + 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r + 1, c + 1}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r + 1, c + 1 });
+		getBorderEmpty(board, visitedCells, r + 1, c + 1);
+	}
+	if (c < cols - 1 && isdigit(board[r][c + 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r, c + 1}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r , c + 1 });
+		getBorderEmpty(board, visitedCells, r, c + 1);
+	}
+	if (c > 0 && isdigit(board[r][c - 1]) && std::find((*visitedCells)[1].begin(), (*visitedCells)[1].end(), std::pair<int, int>{r, c - 1}) == (*visitedCells)[1].end()) {
+		(*visitedCells)[1].push_back({ r , c - 1 });
+		getBorderEmpty(board, visitedCells, r, c - 1);
+	}
+}
 
-	// finding empty spaces around the cell
+// Recursive function to find border. Adds Empty cells
+// visitedCells[0] are empty cells
+// visitedCells[1] are number cells
+void getBorderEmpty(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>* visitedCells, uint16_t r, uint16_t c) {
+
+	//matrixBinds->push_back({NULL, NULL});
+
+	size_t rows = board.size(), cols = board[0].size();
+	
 	if (r > 0 && board[r - 1][c] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r - 1, c}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({r - 1,c});
-		getBorderEmpty(board, visitedCells, r - 1, c);
+		getBorder(board, visitedCells, r - 1, c);
 	}
 	if (r > 0 && c > 0 && board[r - 1][c-1] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r - 1, c-1}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r - 1,c - 1});
-		getBorderEmpty(board, visitedCells, r - 1, c -1);
+		getBorder(board, visitedCells, r - 1, c -1);
 	}
-	if (r > 0 && c < cols - 1 && (board[r - 1][c+1]) && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r - 1, c+1}) == (*visitedCells)[0].end()) {
+	if (r > 0 && c < cols - 1 && (board[r - 1][c+1]) == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r - 1, c+1}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r - 1, c + 1 });
-		getBorderEmpty(board, visitedCells, r - 1, c + 1);
+		getBorder(board, visitedCells, r - 1, c + 1);
 	}
 	if (r < rows - 1 && board[r + 1][c] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r + 1, c}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r + 1, c });
-		getBorderEmpty(board, visitedCells, r + 1, c);
+		getBorder(board, visitedCells, r + 1, c);
 	}
 	if (r < rows - 1 && c > 0 && board[r + 1][c - 1] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r + 1, c - 1}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r + 1, c - 1 });
-		getBorderEmpty(board, visitedCells, r + 1, c-1);
+		getBorder(board, visitedCells, r + 1, c-1);
 	}
 	if (r < rows - 1 && c < cols - 1 && board[r + 1][c + 1] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r + 1, c + 1}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r + 1, c + 1 });
-		getBorderEmpty(board, visitedCells, r + 1, c+1);
+		getBorder(board, visitedCells, r + 1, c+1);
 	}
 	if (c < cols - 1 && board[r ][c + 1] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r , c+1}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r , c + 1 });
-		getBorderEmpty(board, visitedCells, r , c + 1);
+		getBorder(board, visitedCells, r , c + 1);
 	}
 	if (c > 0 && board[r][c-1] == EMPTY && std::find((*visitedCells)[0].begin(), (*visitedCells)[0].end(), std::pair<int, int>{r , c-1}) == (*visitedCells)[0].end()) {
 		(*visitedCells)[0].push_back({ r , c - 1 });
-		getBorderEmpty(board, visitedCells, r , c - 1);
+		getBorder(board, visitedCells, r , c - 1);
 	}
-
 
 }
 
-//std::vector<std::vector<int>> fillMatrix(std::vector<std::vector<char>> board, std::vector<std::pair<int, int>> visitedCells ) {
-//
-//
-//
-//}
+// visitedCells[0] are empty cells
+// visitedCells[1] are number cells
+std::vector<std::vector<double>> fillmatrix(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>  visitedCells ) {
+
+	size_t rows = visitedCells[1].size(), cols = visitedCells[0].size() + 1;
+
+	std::vector<std::vector<double>> matrix(rows, std::vector<double>(cols));
+
+	for (auto n = 0; n < rows; n++) {
+
+		matrix[n][cols - 1] = board[visitedCells[1][n].first][visitedCells[1][n].second] - '0'; //TODO minus miny
+		for (auto e = 0; e < cols-1;e++) {;
+			if (visitedCells[1][n].first-1 <= visitedCells[0][e].first && visitedCells[0][e].first <= visitedCells[1][n].first + 1 
+				&& visitedCells[1][n].second - 1 <= visitedCells[0][e].second && visitedCells[0][e].second <= visitedCells[1][n].second + 1) {
+				matrix[n][e] = 1;
+;			}
+		}
+	}
+
+	return matrix;
+}
+
+void print_matrix(const std::vector<std::vector<double>>& matrix) {
+	for (const auto& row : matrix) {
+		for (const auto& column : row)
+			std::cout << column << " ";
+		std::cout << "\n";
+	}
+}
+
+
+// rewriten pseudocode from https://en.wikipedia.org/wiki/Gaussian_elimination with some modifications
+void gaus(std::vector<std::vector<double>> matrix) {
+	int h = 0; /* Initialization of the pivot row */
+	int k = 0; /* Initialization of the pivot column */
+
+	print_matrix(matrix);
+	std::cout << "\n";
+
+	//std::vector<std::vector<double>> matrix{
+	//		{1, 1, 0, 0, 0, 0, 0, 0, 1},
+	//		{1, 1, 1, 0, 0, 0, 0, 0, 2},
+	//		{0, 1, 1, 1, 0, 0, 0, 0, 3},
+	//		{0, 0, 1, 1, 1, 1, 1, 0, 2},
+	//		{0, 0, 0, 0, 0, 1, 1, 1, 1},
+	//		{0, 0, 0, 0, 0, 0, 1, 1, 1},
+	//};
+
+	int m = matrix.size(), n = matrix[0].size();
+
+	while (h < m and k < n) {
+
+				/* Find the k-th pivot: */
+		int i_max = 0;
+		for (int i = h; i < m; i++) {
+			if (abs(matrix[i][k]) >= i_max)
+				i_max = abs(matrix[i][k]);
+		}
+		
+		if (matrix[i_max][k] == 0) {
+
+			/* No pivot in this column, pass to next column */
+			k = k + 1;
+		}
+		else {
+
+			std::swap(matrix[h], matrix[i_max]);
+			/* Do for all rows below pivot: */
+			for (int i = h + 1; i < m; i++) {
+
+				double f = matrix[i][k] / matrix[h][k];
+				/* Fill with zeros the lower part of pivot column: */
+				matrix[i][k] = 0;
+				/* Do for all remaining elements in current row: */
+				for (int j = k + 1; j < n; j++)
+					matrix[i][j] = matrix[i][j] - matrix[h][j] * f;
+				/* Increase pivot row and column */
+			}
+			h = h + 1;
+			k = k + 1;
+		}
+	}
+
+
+	print_matrix(matrix);
+
+}
 
 //int main(int argc, char* argv[])
 int main()
@@ -239,7 +317,7 @@ int main()
 
 
 	//.............
-	uint16_t rows = 3, columns = 3, minesleft = 3 ;
+	uint16_t rows = 5, columns = 5, minesleft = 5 ;
 	std::vector<std::vector<char>> board(rows, std::vector<char>(columns));
 	std::vector<int> lastPos(2);
 
@@ -253,10 +331,14 @@ int main()
 	{
 
 		ret = readBoard(&board, rows, columns);
+
+		//tmp
 		std::vector<std::vector<std::pair<int, int>>> visitedCells(2);
 
-		getBorder(board,&visitedCells, 0, 0);
+		getBorderEmpty(board,&visitedCells, 3, 0);
 
+		gaus(fillmatrix(board, visitedCells));
+		//---
 
 		if (ret == 3)
 			return EXIT_FAILURE;
