@@ -36,93 +36,21 @@ uint8_t readBoard(std::vector<std::vector<char>>* board, uint16_t rows, uint16_t
 	return 0;
 }
 
+int countSomethingAround(const std::vector<std::vector<char>>& board, const unsigned int r, const unsigned int c, const char someChar) {
 
-
-std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* globalMines) {
-
-	uint8_t emptyN = 0, mines = 1;
-std::vector<int>emptyPos(2);
-
-size_t rows = board.size(), cols = board[0].size();
-for (uint16_t c = 0, r = 0; r < rows; r++) {
-	for (c = 0; c < cols; c++) {
-
-		if (isdigit(board[r][c])) {
-			emptyN = 0;
-			mines = 1;
-			// finding empty spaces around the cell
-			if (r > 0 && (mines += (board[r - 1][c] == MINE)) && board[r - 1][c] == EMPTY) {
-				emptyPos[0] = r - 1;
-				emptyPos[1] = c;
-				emptyN++;
-			}
-			if (r > 0 && c > 0 && (mines += (board[r - 1][c - 1] == MINE)) && board[r - 1][c - 1] == EMPTY) {
-				emptyPos[0] = r - 1;
-				emptyPos[1] = c - 1;
-				emptyN++;
-			}
-			if (r > 0 && c < cols - 1 && (mines += (board[r - 1][c + 1] == MINE)) && board[r - 1][c + 1] == EMPTY) {
-				emptyPos[0] = r - 1;
-				emptyPos[1] = c + 1;
-				emptyN++;
-			}
-			if (r < rows - 1 && (mines += (board[r + 1][c] == MINE)) && board[r + 1][c] == EMPTY) {
-				emptyPos[0] = r + 1;
-				emptyPos[1] = c;
-				emptyN++;;
-			}
-			if (r < rows - 1 && c > 0 && (mines += (board[r + 1][c - 1] == MINE)) && board[r + 1][c - 1] == EMPTY) {
-				emptyPos[0] = r + 1;
-				emptyPos[1] = c - 1;
-				emptyN++;
-			}
-			if (r < rows - 1 && c < cols - 1 && (mines += (board[r + 1][c + 1] == MINE)) && board[r + 1][c + 1] == EMPTY) {
-				emptyPos[0] = r + 1;
-				emptyPos[1] = c + 1;
-				emptyN++;
-			}
-			if (c < cols - 1 && (mines += (board[r][c + 1] == MINE)) && board[r][c + 1] == EMPTY) {
-				emptyPos[0] = r;
-				emptyPos[1] = c + 1;
-				emptyN++;
-			}
-			if (c > 0 && (mines += (board[r][c - 1] == MINE)) && board[r][c - 1] == EMPTY) {
-				emptyPos[0] = r;
-				emptyPos[1] = c - 1;
-				emptyN++;
-			}
-
-			mines--;
-			//posible bomb check
-			if ((emptyN == board[r][c] - '0' - mines) && emptyN > 0) {
-				//if (emptyN == board[r][c] - '0' - mines) {
-				(*globalMines)--;
-				std::cout << "mark " << emptyPos[0] << " " << emptyPos[1] << "\n";
-				return emptyPos;
-				//}
-
-
-			}
-			else if (emptyN > 0 && (board[r][c] - '0') - mines == 0) {
-				std::cout << "step " << emptyPos[0] << " " << emptyPos[1] << "\n";
-				return emptyPos;
-			}
+	unsigned int rmin = (r == 0 ? 0 : r - 1), rmax = (r == board.size() - 1 ? static_cast<unsigned int>(board.size()) - 1 : r + 1);
+	unsigned int cmin = (c == 0 ? 0 : c - 1), cmax = (c == board[0].size() - 1 ? static_cast<unsigned int>(board[0].size()) - 1 : c + 1);
+	int charsCount = 0;
+	for (auto ri = rmin; ri <= rmax; ri++) {
+		for (auto ci = cmin; ci <= cmax; ci++) {
+			if (board[ri][ci] == someChar)
+				charsCount++;
 		}
 	}
+	return charsCount;
 }
 
 
-for (uint16_t c = 0, r = 0; r < rows; r++) {
-	for (c = 0; c < cols; c++) {
-		if (board[r][c] == EMPTY) {
-			std::cout << "random step" << r << c << "\n"; //TODO del
-			return std::vector<int> {r, c};
-
-		}
-	}
-}
-return emptyPos;
-}
 
 
 
@@ -217,19 +145,6 @@ void getBorderEmpty(std::vector<std::vector<char>> board, std::vector<std::vecto
 
 
 
-int coutMinesAround(const std::vector<std::vector<char>>& board, const unsigned int r, const unsigned int c) {
-
-	unsigned int rmin = (r == 0 ? 0 : r - 1), rmax = (r == board.size() - 1 ? static_cast<unsigned int>(board.size()) - 1 : r + 1);
-	unsigned int cmin = (c == 0 ? 0 : c - 1), cmax = (c == board[0].size() - 1 ? static_cast<unsigned int>(board[0].size()) - 1 : c + 1);
-	int mines = 0;
-	for (auto ri = rmin; ri <= rmax; ri++) {
-		for (auto ci = cmin; ci <= cmax; ci++) {
-			if (board[ri][ci] == MINE)
-				mines++;
-		}
-	}
-	return mines;
-}
 
 
 
@@ -243,7 +158,7 @@ std::vector<std::vector<double>> fillmatrix(std::vector<std::vector<char>> board
 
 	for (unsigned int n = 0; n < rows; n++) {
 
-		matrix[n][cols - 1] = board[visitedCells[1][n].first][visitedCells[1][n].second] - '0' - coutMinesAround(board, visitedCells[1][n].first, visitedCells[1][n].second);
+		matrix[n][cols - 1] = board[visitedCells[1][n].first][visitedCells[1][n].second] - '0' - countSomethingAround(board, visitedCells[1][n].first, visitedCells[1][n].second, MINE);
 
 		for (unsigned int  e = 0; e < cols-1;e++) {;
 			if (visitedCells[1][n].first-1 <= visitedCells[0][e].first && visitedCells[0][e].first <= visitedCells[1][n].first + 1 
@@ -299,7 +214,7 @@ std::vector<std::vector<double>> gaus(std::vector<std::vector<double>> matrix) {
 				i = r;
 				lead ++;
 				if (columnCount == lead) {
-					print_matrix(matrix);
+					//print_matrix(matrix);
 					return matrix;
 				}
 			}
@@ -330,10 +245,12 @@ std::vector<std::vector<double>> gaus(std::vector<std::vector<double>> matrix) {
 		lead++;
 	}
 
-	print_matrix(matrix);
+	//print_matrix(matrix);
 	return matrix;
 }
 
+
+// return: #1 == rownum, #2 == colnum, #3 flag {0 : step, 1: mark}
 std::vector<int> getStepWithBounds(std::vector<std::vector<double>> matrix) {
 	double maxBound = 0, minBound = 0;
 
@@ -349,47 +266,146 @@ std::vector<int> getStepWithBounds(std::vector<std::vector<double>> matrix) {
 		if (matrix[r][cols - 1] == minBound) {
 			for (uint16_t c = 0; c < cols - 1; c++) {
 				if (matrix[r][c] < 0) {
-					std::cout << "mark " << r << " " << c << "\n";
-					return std::vector<int> {r, c};
+					//std::cout << "mark " << r << " " << c << "\n";
+					return {r, c, 1};
 				}
 				if (matrix[r][c] > 0) {
-					std::cout << "step " << r << " " << c << "\n";
-					return std::vector<int> {r, c};
+					//std::cout << "step " << r << " " << c << "\n";
+					return  {r, c, 0};
 				}
 			}
 		}
 		else if (matrix[r][cols - 1] == maxBound) {
 			for (uint16_t c = 0; c < cols - 1; c++) {
 				if (matrix[r][c] > 0) {
-					std::cout << "mark " << r << " " << c << "\n";
-					return std::vector<int> {r, c};
+					//std::cout << "mark " << r << " " << c << "\n";
+					return  {r, c, 1};
 				}
 				if (matrix[r][c] < 0) {
-					std::cout << "step " << r << " " << c << "\n";
-					return std::vector<int> {r, c};
+					//std::cout << "step " << r << " " << c << "\n";
+					return  {r, c, 0};
 				}
 			}
 		}
 	}
 	
-	return { -1,-1 };
+	return { -1,-1, -1 };
 }
+
+
+
+std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* globalMines) {
+
+	uint8_t emptyN = 0, mines = 1;
+	std::vector<int>emptyPos(2);
+
+	size_t rows = board.size(), cols = board[0].size();
+	for (uint16_t c = 0, r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+
+			if (isdigit(board[r][c])) {
+				emptyN = 0;
+				mines = 1;
+				// finding empty spaces around the cell
+				if (r > 0 && (mines += (board[r - 1][c] == MINE)) && board[r - 1][c] == EMPTY) {
+					emptyPos[0] = r - 1;
+					emptyPos[1] = c;
+					emptyN++;
+				}
+				if (r > 0 && c > 0 && (mines += (board[r - 1][c - 1] == MINE)) && board[r - 1][c - 1] == EMPTY) {
+					emptyPos[0] = r - 1;
+					emptyPos[1] = c - 1;
+					emptyN++;
+				}
+				if (r > 0 && c < cols - 1 && (mines += (board[r - 1][c + 1] == MINE)) && board[r - 1][c + 1] == EMPTY) {
+					emptyPos[0] = r - 1;
+					emptyPos[1] = c + 1;
+					emptyN++;
+				}
+				if (r < rows - 1 && (mines += (board[r + 1][c] == MINE)) && board[r + 1][c] == EMPTY) {
+					emptyPos[0] = r + 1;
+					emptyPos[1] = c;
+					emptyN++;;
+				}
+				if (r < rows - 1 && c > 0 && (mines += (board[r + 1][c - 1] == MINE)) && board[r + 1][c - 1] == EMPTY) {
+					emptyPos[0] = r + 1;
+					emptyPos[1] = c - 1;
+					emptyN++;
+				}
+				if (r < rows - 1 && c < cols - 1 && (mines += (board[r + 1][c + 1] == MINE)) && board[r + 1][c + 1] == EMPTY) {
+					emptyPos[0] = r + 1;
+					emptyPos[1] = c + 1;
+					emptyN++;
+				}
+				if (c < cols - 1 && (mines += (board[r][c + 1] == MINE)) && board[r][c + 1] == EMPTY) {
+					emptyPos[0] = r;
+					emptyPos[1] = c + 1;
+					emptyN++;
+				}
+				if (c > 0 && (mines += (board[r][c - 1] == MINE)) && board[r][c - 1] == EMPTY) {
+					emptyPos[0] = r;
+					emptyPos[1] = c - 1;
+					emptyN++;
+				}
+
+				mines--;
+				//posible bomb check
+				if ((emptyN == board[r][c] - '0' - mines) && emptyN > 0) {
+					//if (emptyN == board[r][c] - '0' - mines) {
+					(*globalMines)--;
+					std::cout << "mark " << emptyPos[0] << " " << emptyPos[1] << "\n";
+					return emptyPos;
+					//}
+
+
+				}
+				else if (emptyN > 0 && (board[r][c] - '0') - mines == 0) {
+					std::cout << "step " << emptyPos[0] << " " << emptyPos[1] << "\n";
+					return emptyPos;
+				}
+			}
+		}
+	}
+	
+
+	//solving with matrix
+	std::vector<std::vector<std::pair<int, int>>> visitedCells(2);
+	std::vector<int> matrixPos = { 0,0,0 };
+
+	for (uint16_t c = 0, r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			if (isdigit(board[r][c]) && countSomethingAround(board, r, c, EMPTY) > 0) {
+
+
+				getBorderEmpty(board, &visitedCells, r, c);
+				matrixPos = getStepWithBounds(gaus(fillmatrix(board, visitedCells)));
+
+				if (matrixPos[0] == -1)
+					continue;
+
+				if (matrixPos[2] == 0)
+					std::cout << "step " << visitedCells[0][matrixPos[1]].first << " " << visitedCells[0][matrixPos[1]].second << "\n";
+				else
+					std::cout << "mark " << visitedCells[0][matrixPos[1]].first << " " << visitedCells[0][matrixPos[1]].second << "\n";
+				
+				return { visitedCells[0][matrixPos[1]].first , visitedCells[0][matrixPos[1]].second};
+
+			}
+		}
+	}
+
+
+	return emptyPos;
+}
+
+
 
 //int main(int argc, char* argv[])
 int main()
 {
 
-	//std::vector<std::vector<int>> a = { {2, -1, 1, 5},
-	//				  {1, -2, 2, 3},
-	//				  {1, 1, 1, 6} };
-
-	//gaussElimination(a);
-
-
-
-
 	//.............
-	uint16_t rows = 5, columns = 5, minesleft = 5 ;
+	uint16_t rows = 5, columns = 7, minesleft = 5 ;
 	std::vector<std::vector<char>> board(rows, std::vector<char>(columns));
 	std::vector<int> lastPos(2);
 
@@ -404,13 +420,6 @@ int main()
 
 		ret = readBoard(&board, rows, columns);
 
-		//tmp
-		std::vector<std::vector<std::pair<int, int>>> visitedCells(2);
-
-		getBorderEmpty(board,&visitedCells, 3, 0);
-
-		gaus(fillmatrix(board, visitedCells));
-		//---
 
 		if (ret == 3)
 			return EXIT_FAILURE;
