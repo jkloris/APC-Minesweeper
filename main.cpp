@@ -198,6 +198,7 @@ std::vector<std::vector<double>> gaus(std::vector<std::vector<double>> matrix) {
 	//	//{1,2,-1,-4},{2,3,-1,-11},{-2,0,-3,22}
 	//};
 
+	//print_matrix(matrix);
 
 	size_t rowCount = matrix.size(), columnCount = matrix[0].size(), i = 0, lead = 0;
 	double lv = 0;
@@ -257,6 +258,7 @@ std::vector<int> getStepWithBounds(std::vector<std::vector<double>> matrix) {
 	uint16_t rows = static_cast<uint16_t>(matrix.size()), cols = static_cast<uint16_t>(matrix[0].size());
 
 	for (uint16_t r = 0; r < rows; r++) {
+		maxBound = 0, minBound = 0;
 		for (uint16_t c = 0; c < cols - 1; c++) {
 			if (matrix[r][c] > 0)
 				maxBound += matrix[r][c];
