@@ -215,6 +215,24 @@ void getBorderEmpty(std::vector<std::vector<char>> board, std::vector<std::vecto
 
 }
 
+
+
+int coutMinesAround(const std::vector<std::vector<char>>& board, const unsigned int r, const unsigned int c) {
+
+	unsigned int rmin = (r == 0 ? 0 : r - 1), rmax = (r == board.size() - 1 ? static_cast<unsigned int>(board.size()) - 1 : r + 1);
+	unsigned int cmin = (c == 0 ? 0 : c - 1), cmax = (c == board[0].size() - 1 ? static_cast<unsigned int>(board[0].size()) - 1 : c + 1);
+	int mines = 0;
+	for (auto ri = rmin; ri <= rmax; ri++) {
+		for (auto ci = cmin; ci <= cmax; ci++) {
+			if (board[ri][ci] == MINE)
+				mines++;
+		}
+	}
+	return mines;
+}
+
+
+
 // visitedCells[0] are empty cells
 // visitedCells[1] are number cells
 std::vector<std::vector<double>> fillmatrix(std::vector<std::vector<char>> board, std::vector<std::vector<std::pair<int, int>>>  visitedCells ) {
@@ -223,10 +241,11 @@ std::vector<std::vector<double>> fillmatrix(std::vector<std::vector<char>> board
 
 	std::vector<std::vector<double>> matrix(rows, std::vector<double>(cols));
 
-	for (auto n = 0; n < rows; n++) {
+	for (unsigned int n = 0; n < rows; n++) {
 
-		matrix[n][cols - 1] = board[visitedCells[1][n].first][visitedCells[1][n].second] - '0'; //TODO minus miny
-		for (auto e = 0; e < cols-1;e++) {;
+		matrix[n][cols - 1] = board[visitedCells[1][n].first][visitedCells[1][n].second] - '0' - coutMinesAround(board, visitedCells[1][n].first, visitedCells[1][n].second);
+
+		for (unsigned int  e = 0; e < cols-1;e++) {;
 			if (visitedCells[1][n].first-1 <= visitedCells[0][e].first && visitedCells[0][e].first <= visitedCells[1][n].first + 1 
 				&& visitedCells[1][n].second - 1 <= visitedCells[0][e].second && visitedCells[0][e].second <= visitedCells[1][n].second + 1) {
 				matrix[n][e] = 1;
@@ -237,22 +256,22 @@ std::vector<std::vector<double>> fillmatrix(std::vector<std::vector<char>> board
 	return matrix;
 }
 
+
+
+//TODO del
 void print_matrix(const std::vector<std::vector<double>>& matrix) {
 	for (const auto& row : matrix) {
 		for (const auto& column : row)
 			std::cout << column << " ";
 		std::cout << "\n";
 	}
+	std::cout << "\n";
 }
 
 
-// rewriten pseudocode from https://en.wikipedia.org/wiki/Gaussian_elimination with some modifications
-void gaus(std::vector<std::vector<double>> matrix) {
-	int h = 0; /* Initialization of the pivot row */
-	int k = 0; /* Initialization of the pivot column */
-
-	print_matrix(matrix);
-	std::cout << "\n";
+// rewriten pseudocode from https://rosettacode.org/wiki/Reduced_row_echelon_form with some modifications
+std::vector<std::vector<double>> gaus(std::vector<std::vector<double>> matrix) {
+	
 
 	//std::vector<std::vector<double>> matrix{
 	//		{1, 1, 0, 0, 0, 0, 0, 0, 1},
@@ -261,46 +280,99 @@ void gaus(std::vector<std::vector<double>> matrix) {
 	//		{0, 0, 1, 1, 1, 1, 1, 0, 2},
 	//		{0, 0, 0, 0, 0, 1, 1, 1, 1},
 	//		{0, 0, 0, 0, 0, 0, 1, 1, 1},
+	//	//{1,2,-1,-4},{2,3,-1,-11},{-2,0,-3,22}
 	//};
 
-	int m = matrix.size(), n = matrix[0].size();
 
-	while (h < m and k < n) {
+	size_t rowCount = matrix.size(), columnCount = matrix[0].size(), i = 0, lead = 0;
+	double lv = 0;
+	
+	for (size_t r = 0; r < rowCount; r++) {
 
-				/* Find the k-th pivot: */
-		int i_max = 0;
-		for (int i = h; i < m; i++) {
-			if (abs(matrix[i][k]) >= i_max)
-				i_max = abs(matrix[i][k]);
-		}
-		
-		if (matrix[i_max][k] == 0) {
+		if (lead >= columnCount)
+			break;
+		i = r;
+		while (matrix[i][lead] == 0) {
+			i += 1;
 
-			/* No pivot in this column, pass to next column */
-			k = k + 1;
-		}
-		else {
-
-			std::swap(matrix[h], matrix[i_max]);
-			/* Do for all rows below pivot: */
-			for (int i = h + 1; i < m; i++) {
-
-				double f = matrix[i][k] / matrix[h][k];
-				/* Fill with zeros the lower part of pivot column: */
-				matrix[i][k] = 0;
-				/* Do for all remaining elements in current row: */
-				for (int j = k + 1; j < n; j++)
-					matrix[i][j] = matrix[i][j] - matrix[h][j] * f;
-				/* Increase pivot row and column */
+			if (i == rowCount) {
+				i = r;
+				lead ++;
+				if (columnCount == lead) {
+					print_matrix(matrix);
+					return matrix;
+				}
 			}
-			h = h + 1;
-			k = k + 1;
 		}
+
+		std::swap(matrix[i], matrix[r]);
+		
+		lv = matrix[r][lead];
+
+		if (lv != 0) {
+
+			for (size_t mrx = 0; mrx < columnCount; mrx++) {
+				matrix[r][mrx] /= lv;
+			}
+		}
+
+		for (i = 0; i < rowCount; i++) {
+
+			if (i != r) {
+
+				lv = matrix[i][lead];
+				for (size_t j = 0; j < columnCount; j++) {
+
+					matrix[i][j] -= matrix[r][j] * lv;
+				}
+			}
+		}
+		lead++;
 	}
 
-
 	print_matrix(matrix);
+	return matrix;
+}
 
+std::vector<int> getStepWithBounds(std::vector<std::vector<double>> matrix) {
+	double maxBound = 0, minBound = 0;
+
+	uint16_t rows = static_cast<uint16_t>(matrix.size()), cols = static_cast<uint16_t>(matrix[0].size());
+
+	for (uint16_t r = 0; r < rows; r++) {
+		for (uint16_t c = 0; c < cols - 1; c++) {
+			if (matrix[r][c] > 0)
+				maxBound += matrix[r][c];
+			else if (matrix[r][c] < 0)
+				minBound += matrix[r][c];
+		}
+		if (matrix[r][cols - 1] == minBound) {
+			for (uint16_t c = 0; c < cols - 1; c++) {
+				if (matrix[r][c] < 0) {
+					std::cout << "mark " << r << " " << c << "\n";
+					return std::vector<int> {r, c};
+				}
+				if (matrix[r][c] > 0) {
+					std::cout << "step " << r << " " << c << "\n";
+					return std::vector<int> {r, c};
+				}
+			}
+		}
+		else if (matrix[r][cols - 1] == maxBound) {
+			for (uint16_t c = 0; c < cols - 1; c++) {
+				if (matrix[r][c] > 0) {
+					std::cout << "mark " << r << " " << c << "\n";
+					return std::vector<int> {r, c};
+				}
+				if (matrix[r][c] < 0) {
+					std::cout << "step " << r << " " << c << "\n";
+					return std::vector<int> {r, c};
+				}
+			}
+		}
+	}
+	
+	return { -1,-1 };
 }
 
 //int main(int argc, char* argv[])
