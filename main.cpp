@@ -11,7 +11,7 @@
 #define ZERO '.'
 
 
-uint8_t readBoard(std::vector<std::vector<char>>* board, uint16_t rows, uint16_t columns) {
+uint8_t readBoard(std::vector<std::vector<char>>* board, uint16_t rows, uint16_t columns, uint8_t flag = 0) {
 
 	
 	std::string row;
@@ -27,7 +27,7 @@ uint8_t readBoard(std::vector<std::vector<char>>* board, uint16_t rows, uint16_t
 		for (uint16_t c = 0; c < columns; c++) {
 			ch = row[c];
 			// moze byt 9? TODO
-			if (!isdigit(ch) && ch != MINE && ch != EMPTY && ch != ZERO)
+			if (!(ch >= '1' && ch < '9') && ch != EMPTY && ch != ZERO && (flag == 1 || ch != MINE))
 				return 3;
 			(*board)[r][c] = ch;
 		}
@@ -257,6 +257,8 @@ std::vector<int> getStepWithBounds(std::vector<std::vector<double>> matrix) {
 
 	uint16_t rows = static_cast<uint16_t>(matrix.size()), cols = static_cast<uint16_t>(matrix[0].size());
 
+	//print_matrix(matrix);
+
 	for (uint16_t r = 0; r < rows; r++) {
 		maxBound = 0, minBound = 0;
 		for (uint16_t c = 0; c < cols - 1; c++) {
@@ -396,18 +398,51 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 		}
 	}
 
+	// guessing 
+	for (uint16_t c = 0, r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			if (board[r][c] == EMPTY) {
+				std::cout << "step(Rand) " << r << " " << c << "\n"; //TODO
+				return { r,c };
+			}
+				
+		}
+	}
 
 	return emptyPos;
 }
 
 
 
-//int main(int argc, char* argv[])
-int main()
+//int main()
+int main(int argc, char* argv[])
 {
 
+	// Args check
+
+	uint16_t rows = 0, columns = 0, minesleft = 0;
+
+	if (argc != 4)
+		return EXIT_FAILURE;
+	try
+	{
+		rows = static_cast<uint16_t>(std::stoi(argv[1]));
+		columns = static_cast<uint16_t>(std::stoi(argv[2]));
+		minesleft = static_cast<uint16_t>(std::stoi(argv[3]));
+
+	}
+	catch (const std::exception&)
+	{
+		return EXIT_FAILURE; 
+	}
+
+
+	if (rows < 2 || rows > 100 || columns < 2 || columns > 100 || minesleft <= 0 || minesleft >= rows * columns)
+		return EXIT_FAILURE;
+
+
 	//.............
-	uint16_t rows = 5, columns = 7, minesleft = 5 ;
+
 	std::vector<std::vector<char>> board(rows, std::vector<char>(columns));
 	std::vector<int> lastPos(2);
 
@@ -417,6 +452,15 @@ int main()
 
 	uint8_t ret = 0;
 
+	ret = readBoard(&board, rows, columns, 1);
+
+	if (ret == 3)
+		return EXIT_FAILURE;
+	if (ret == 1)
+		return EXIT_SUCCESS;
+
+	lastPos = printAction(board, &minesleft);
+	
 	while (true)
 	{
 
@@ -427,6 +471,7 @@ int main()
 			return EXIT_FAILURE;
 		if (ret == 1)
 			return EXIT_SUCCESS;
+
 		//if (board[lastPos[0]][lastPos[1]] == MINE) {
 		//	std::cout << "mine found\n"; //TODO del
 		//	return EXIT_SUCCESS;
