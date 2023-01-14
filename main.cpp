@@ -19,14 +19,13 @@ uint8_t readBoard(std::vector<std::vector<char>>* board, uint16_t rows, uint16_t
 
 	for (uint16_t r = 0; r < rows; r++) {
 		std::getline(std::cin, row);
-		if (row.size() == 0)
+		if (row.size() == 0 && r == 0)
 			return 1;
 		if (row.size() != columns )
 			return 3;
 
 		for (uint16_t c = 0; c < columns; c++) {
 			ch = row[c];
-			// moze byt 9? TODO
 			if (!(ch >= '1' && ch < '9') && ch != EMPTY && ch != ZERO && (flag == 1 || ch != MINE))
 				return 3;
 			(*board)[r][c] = ch;
@@ -174,31 +173,19 @@ std::vector<std::vector<double>> fillmatrix(std::vector<std::vector<char>> board
 
 
 //TODO del
-void print_matrix(const std::vector<std::vector<double>>& matrix) {
-	for (const auto& row : matrix) {
-		for (const auto& column : row)
-			std::cout << column << " ";
-		std::cout << "\n";
-	}
-	std::cout << "\n";
-}
+//void print_matrix(const std::vector<std::vector<double>>& matrix) {
+//	for (const auto& row : matrix) {
+//		for (const auto& column : row)
+//			std::cout << column << " ";
+//		std::cout << "\n";
+//	}
+//	std::cout << "\n";
+//}
 
 
 // rewriten pseudocode from https://rosettacode.org/wiki/Reduced_row_echelon_form with some modifications
 std::vector<std::vector<double>> gaus(std::vector<std::vector<double>> matrix) {
 	
-
-	//std::vector<std::vector<double>> matrix{
-	//		{1, 1, 0, 0, 0, 0, 0, 0, 1},
-	//		{1, 1, 1, 0, 0, 0, 0, 0, 2},
-	//		{0, 1, 1, 1, 0, 0, 0, 0, 3},
-	//		{0, 0, 1, 1, 1, 1, 1, 0, 2},
-	//		{0, 0, 0, 0, 0, 1, 1, 1, 1},
-	//		{0, 0, 0, 0, 0, 0, 1, 1, 1},
-	//	//{1,2,-1,-4},{2,3,-1,-11},{-2,0,-3,22}
-	//};
-
-	//print_matrix(matrix);
 
 	size_t rowCount = matrix.size(), columnCount = matrix[0].size(), i = 0, lead = 0;
 	double lv = 0;
@@ -246,7 +233,7 @@ std::vector<std::vector<double>> gaus(std::vector<std::vector<double>> matrix) {
 		lead++;
 	}
 
-	//print_matrix(matrix);
+
 	return matrix;
 }
 
@@ -353,13 +340,11 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 				}
 
 				mines--;
-				//posible bomb check
+				//possible bomb check
 				if ((emptyN == board[r][c] - '0' - mines) && emptyN > 0) {
-					//if (emptyN == board[r][c] - '0' - mines) {
 					(*globalMines)--;
 					std::cout << "mark " << emptyPos[0] << " " << emptyPos[1] << "\n";
 					return emptyPos;
-					//}
 
 
 				}
@@ -402,7 +387,7 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 	for (uint16_t c = 0, r = 0; r < rows; r++) {
 		for (c = 0; c < cols; c++) {
 			if (board[r][c] == EMPTY) {
-				std::cout << "step(Rand) " << r << " " << c << "\n"; //TODO
+				std::cout << "step " << r << " " << c << "\n"; 
 				return { r,c };
 			}
 				
@@ -414,7 +399,6 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 
 
 
-//int main()
 int main(int argc, char* argv[])
 {
 
@@ -447,8 +431,6 @@ int main(int argc, char* argv[])
 	std::vector<int> lastPos(2);
 
 
-	
-
 
 	uint8_t ret = 0;
 
@@ -472,16 +454,8 @@ int main(int argc, char* argv[])
 		if (ret == 1)
 			return EXIT_SUCCESS;
 
-		//if (board[lastPos[0]][lastPos[1]] == MINE) {
-		//	std::cout << "mine found\n"; //TODO del
-		//	return EXIT_SUCCESS;
-		//}
 		lastPos = printAction(board, &minesleft);
 
-		//if (minesleft == 0) {
-		//	std::cout << "all mines marked\n"; //TODO del
-		//	return EXIT_SUCCESS;
-		//}
 	}
 
 	return 0;
