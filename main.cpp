@@ -343,13 +343,13 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 				//possible bomb check
 				if ((emptyN == board[r][c] - '0' - mines) && emptyN > 0) {
 					(*globalMines)--;
-					std::cout << "mark " << emptyPos[0] << " " << emptyPos[1] << "\n";
+					std::cout << "mark " << emptyPos[0] << " " << emptyPos[1] << std::endl;
 					return emptyPos;
 
 
 				}
 				else if (emptyN > 0 && (board[r][c] - '0') - mines == 0) {
-					std::cout << "step " << emptyPos[0] << " " << emptyPos[1] << "\n";
+					std::cout << "step " << emptyPos[0] << " " << emptyPos[1] << std::endl;
 					return emptyPos;
 				}
 			}
@@ -373,9 +373,9 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 					continue;
 
 				if (matrixPos[2] == 0)
-					std::cout << "step " << visitedCells[0][matrixPos[1]].first << " " << visitedCells[0][matrixPos[1]].second << "\n";
+					std::cout << "step " << visitedCells[0][matrixPos[1]].first << " " << visitedCells[0][matrixPos[1]].second << std::endl;
 				else
-					std::cout << "mark " << visitedCells[0][matrixPos[1]].first << " " << visitedCells[0][matrixPos[1]].second << "\n";
+					std::cout << "mark " << visitedCells[0][matrixPos[1]].first << " " << visitedCells[0][matrixPos[1]].second << std::endl;
 				
 				return { visitedCells[0][matrixPos[1]].first , visitedCells[0][matrixPos[1]].second};
 
@@ -387,7 +387,7 @@ std::vector<int> printAction(std::vector<std::vector<char>> board, uint16_t* glo
 	for (uint16_t c = 0, r = 0; r < rows; r++) {
 		for (c = 0; c < cols; c++) {
 			if (board[r][c] == EMPTY) {
-				std::cout << "step " << r << " " << c << "\n"; 
+				std::cout << "step " << r << " " << c << std::endl; 
 				return { r,c };
 			}
 				
